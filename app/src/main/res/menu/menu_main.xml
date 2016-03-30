@@ -3,8 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.student.metatemp.MainActivity">
     <item
+        android:id="@+id/action_home"
+        android:icon="@drawable/ic_home_white_24dp"
+        android:orderInCategory="10"
+        android:title="@string/action_home"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_graph"
+        android:icon="@drawable/ic_timeline_white_24dp"
+        android:orderInCategory="50"
+        android:title="@string/action_graph"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_white_24dp"
         android:orderInCategory="100"
         android:title="@string/action_settings"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 </menu>

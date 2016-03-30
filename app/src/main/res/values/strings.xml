@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">MetaTemp</string>
+    <string name="action_home">Home</string>
+    <string name="action_graph">Graph</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
 
