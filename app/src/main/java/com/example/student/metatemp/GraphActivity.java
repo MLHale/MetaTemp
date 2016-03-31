@@ -7,33 +7,26 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
-public class MainActivity extends AppCompatActivity {
+public class GraphActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_graph);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_graph, menu);
         return true;
     }
 
@@ -44,21 +37,29 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         Intent intent;
 
+        System.err.println(item);
+        System.err.println(item.getTitle());
+        System.err.println(item.getItemId());
+        System.err.println(R.id.home);
+        System.err.println(R.id.action_home);
         switch (item.getItemId()) {
-            case R.id.home:
+            case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
-            /*case R.id.action_home:
-                return true;*/
-            case R.id.action_graph:
-                intent = new Intent(this, GraphActivity.class);
+            case R.id.action_home:
+                intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
                 return true;
+            /*case R.id.action_graph:
+                intent = new Intent(this, GraphActivity.class);
+                startActivity(intent);
+                return true;*/
             case R.id.action_settings:
                 intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
             default:
+                System.err.println("DEFAULT");
                 return super.onOptionsItemSelected(item);
         }
     }
