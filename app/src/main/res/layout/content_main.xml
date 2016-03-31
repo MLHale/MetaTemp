@@ -12,8 +12,22 @@
     tools:context="com.example.student.metatemp.MainActivity"
     tools:showIn="@layout/activity_main">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Main content" />
+    <RelativeLayout
+        android:id="@+id/circle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="?attr/actionBarSize" >
+
+        <TextView
+            android:id="@+id/large_volume"
+            android:layout_width="220dp"
+            android:layout_height="220dp"
+            android:background="@drawable/ellipse"
+            android:gravity="center"
+            android:text="55°"
+            android:textColor="#FFFFFF"
+            android:textSize="75dp" />
+
+    </RelativeLayout>
 </RelativeLayout>
