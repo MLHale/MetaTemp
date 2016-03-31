@@ -183,11 +183,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         Intent intent;
 
-        System.err.println(item);
-        System.err.println(item.getTitle());
-        System.err.println(item.getItemId());
-        System.err.println(R.id.home);
-        System.err.println(R.id.action_home);
         switch (item.getItemId()) {
             case android.R.id.home:
                 System.err.println(this);
@@ -198,7 +193,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 startActivity(intent);
                 return true;
             case R.id.action_graph:
-                System.err.println(this);
                 intent = new Intent(this, GraphActivity.class);
                 startActivity(intent);
                 return true;
@@ -207,7 +201,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 startActivity(intent);
                 return true;*/
             default:
-                System.err.println("DEFAULT");
                 return super.onOptionsItemSelected(item);
         }
     }

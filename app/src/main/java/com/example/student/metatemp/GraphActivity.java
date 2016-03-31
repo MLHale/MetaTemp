@@ -11,6 +11,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
 public class GraphActivity extends AppCompatActivity {
 
     @Override
@@ -21,6 +25,15 @@ public class GraphActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        GraphView graph = (GraphView) findViewById(R.id.graph);
+        LineGraphSeries<DataPoint> series = new LineGraphSeries<DataPoint>(new DataPoint[] {
+                new DataPoint(0, 1),
+                new DataPoint(1, 5),
+                new DataPoint(2, 3),
+                new DataPoint(3, 2),
+                new DataPoint(4, 6)
+        });
+        graph.addSeries(series);
     }
 
     @Override
@@ -37,11 +50,6 @@ public class GraphActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         Intent intent;
 
-        System.err.println(item);
-        System.err.println(item.getTitle());
-        System.err.println(item.getItemId());
-        System.err.println(R.id.home);
-        System.err.println(R.id.action_home);
         switch (item.getItemId()) {
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
@@ -59,7 +67,6 @@ public class GraphActivity extends AppCompatActivity {
                 startActivity(intent);
                 return true;
             default:
-                System.err.println("DEFAULT");
                 return super.onOptionsItemSelected(item);
         }
     }
