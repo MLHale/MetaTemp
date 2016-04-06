@@ -30,4 +30,15 @@
             android:textSize="75dp" />
 
     </RelativeLayout>
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:indeterminate="false"
+        android:progressTint="@color/colorPrimary"
+        android:max="100"
+        android:progress="55"/>
 </RelativeLayout>
