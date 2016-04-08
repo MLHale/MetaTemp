@@ -5,6 +5,31 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
 
+    <!-- Strings from mbientlab's TemperatureTrackerAndroid -->
+    <string name="label_scan">Scan</string>
+    <string name="label_stop">Stop</string>
+    <string name="label_ok">OK</string>
+    <string name="connect">Connect</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="metawear">MetaWear</string>
+    <string name="no_metawear_connected">No Metawear Connected</string>
+    <string name="metawear_connected">Metawear Connected</string>
+    <string name="metawear_syncing">Metawear Syncing</string>
+    <string name="error_title">Error</string>
+    <string name="error_no_bluetooth">Bluetooth device not deteted</string>
+    <string name="dialog_no">No</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="pairing_title">Pair Device</string>
+    <string name="pairing_text">Do you see a blinking blue LED on the MetaWear?</string>
+    <string name="toast_connected">MetaWear Connected</string>
+    <string name="toast_disconnected">MetaWear Disconnected</string>
+    <string name="toast_no_board">No MetaWear Connected</string>
+    <string name="toast_in_demo_mode">Can\'t do that in demo mode.</string>
+    <string name="message_soft_reset">Board Soft Reset Issued</string>
+    <string name="error_soft_reset">Board Reset Failed</string>
+    <string name="thermistor_not_supported">Thermistor not supported or firmware needs updating.</string>
+
+
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
@@ -63,4 +88,6 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_graph">GraphActivity</string>
+    <string name="title_activity_mwdevice_confirm_fragment">MWDeviceConfirmFragment</string>
+    <string name="title_activity_mwscanner_fragment">MWScannerFragment</string>
 </resources>

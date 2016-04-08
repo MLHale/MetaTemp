@@ -12,6 +12,25 @@
     tools:context="com.example.student.metatemp.MainActivity"
     tools:showIn="@layout/activity_main">
 
+    <Button
+        android:id="@+id/action_connect"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="@string/connect"
+        android:onClick="connectAction" />
+
+    <TextView
+        android:id="@+id/connection_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-thin"
+        android:paddingLeft="9dp"
+        android:paddingTop="2dp"
+        android:text="@string/no_metawear_connected"
+        android:textColor="#ffffffff" />
+    <!--android:layout_below="@+id/meta_wear_title"-->
+    <!--android:layout_toEndOf="@+id/mw_board_icon"-->
+
     <RelativeLayout
         android:id="@+id/circle"
         android:layout_width="match_parent"

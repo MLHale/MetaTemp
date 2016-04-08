@@ -2,12 +2,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.student.metatemp">
 
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <service android:name="com.mbientlab.metawear.MetaWearBleService" />
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -28,6 +33,14 @@
             android:label="@string/title_activity_graph"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".MWDeviceConfirmFragment"
+            android:label="@string/title_activity_mwdevice_confirm_fragment"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        <activity
+            android:name=".MWScannerFragment"
+            android:label="@string/title_activity_mwscanner_fragment"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
     </application>
 
 </manifest>
