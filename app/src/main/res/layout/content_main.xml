@@ -22,12 +22,12 @@
 
     <TextView
         android:id="@+id/connection_status"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/action_connect"
-        android:fontFamily="sans-serif-thin"
-        android:paddingLeft="9dp"
-        android:paddingTop="2dp"
+        android:layout_toRightOf="@id/action_connect"
+        android:fontFamily="sans-serif"
+        android:paddingLeft="12dp"
+        android:paddingTop="12dp"
         android:gravity="center"
         android:text="@string/no_metawear_connected"
         android:textColor="#000"
@@ -41,7 +41,7 @@
         android:layout_height="match_parent"
         android:gravity="center_horizontal"
         android:layout_below="@+id/connection_status"
-        android:layout_marginTop="20dp" >
+        android:layout_marginTop="50dp" >
 
         <TextView
             android:id="@+id/large_volume"

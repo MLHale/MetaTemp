@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onResume() {
         super.onResume();
 
-        String bleMacAddress = sharedPreferences.getString("ble_mac_address", null);
+        String bleMacAddress = getBluetoothDevice();
         if (bleMacAddress != null && menu != null) {
             addBluetoothToMenuAndConnectionStatus(bleMacAddress);
         }
@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public void onServiceConnected(ComponentName name, IBinder service) {
         ///< Get a reference to the MetaWear service from the binder
         mwBinder = (MetaWearBleService.LocalBinder) service;
-        String bleMacAddress = sharedPreferences.getString("ble_mac_address", null);
+        String bleMacAddress = getBluetoothDevice();
         Log.i("Service Connected", "Stored mac address is " + bleMacAddress);
         if (bleMacAddress != null) {
             bluetoothDevice = btAdapter.getRemoteDevice(bleMacAddress);
@@ -396,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private void connectDevice(BluetoothDevice device) {
         mwBoard = mwBinder.getMetaWearBoard(device);
 
-        String bleMacAddress = sharedPreferences.getString("ble_mac_address", null);
+        String bleMacAddress = getBluetoothDevice();
         if (bleMacAddress != null) {
             String boardState = sharedPreferences.getString(bleMacAddress, null);
             if (boardState != null) {
@@ -551,7 +551,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         Button connectButton = (Button) findViewById(R.id.action_connect);
         connectButton.setText(R.string.disconnect);
         TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
-        connectionStatus.setText(getText(R.string.metawear_connected));
+        connectionStatus.setText("Connected to " + bluetoothAddress);
 
         adapters.add(bluetoothAddress);
         editor.putString("ble_mac_address", bluetoothAddress);
