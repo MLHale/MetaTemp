@@ -125,8 +125,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             thermistorFragment = new ThermistorFragment();
 //            getFragmentManager().beginTransaction().add(R.id.container, mainFragment)
 //                    .add(R.id.container, thermistorFragment, ACCELEROMETER_FRAGMENT_KEY).commit();
-            getFragmentManager().beginTransaction().add(R.id.container, mainFragment)
-                    .add(R.id.container, thermistorFragment, ACCELEROMETER_FRAGMENT_KEY).commit();
+            getFragmentManager().beginTransaction().add(R.id.main_container, thermistorFragment, ACCELEROMETER_FRAGMENT_KEY).commit();
 //            mGraphFragment = (GraphFragment) getFragmentManager().findFragmentById(R.id.graph);
         } else {
             thermistorFragment = (ThermistorFragment) getFragmentManager().getFragment(savedInstanceState, ACCELEROMETER_FRAGMENT_KEY);
@@ -323,8 +322,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             Toast.makeText(getApplicationContext(), R.string.thermistor_not_supported, Toast.LENGTH_SHORT).show();
             mwBoard.disconnect();
             bluetoothDevice = null;
-            MenuItem connectMenuItem = menu.findItem(R.id.action_connect);
-            connectMenuItem.setTitle(R.string.connect);
+            Button connectButton = (Button) findViewById(R.id.action_connect);
+            connectButton.setText(R.string.connect);
         }
     }
 
@@ -513,12 +512,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
      */
     private void setAdaptersToDisconnected() {
         for (String adapter : adapters) {
-            int menuId = sharedPreferences.getInt(adapter + "_menu_id", -1);
-            MenuItem menuItem = menu.findItem(menuId);
-            if (menuItem == null) {
-                menu.add(0, menuId, 0, adapter).getItemId();
+            boolean connected = sharedPreferences.getBoolean(adapter + "_connected", false);
+//            MenuItem menuItem = menu.findItem(connected);
+//            if (menuItem == null) {
+            if (!connected) {
+            //        menu.add(0, connected, 0, adapter).getItemId();
             } else {
-                menuItem.setTitle(adapter);
+            //    menuItem.setTitle(adapter);
             }
         }
     }
@@ -531,12 +531,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     public void addBluetoothToMenuAndConnectionStatus(String bluetoothAddress) {
-        int existingMenuId = sharedPreferences.getInt(bluetoothAddress + "_menu_id", -1);
+        boolean existingConnection = sharedPreferences.getBoolean(bluetoothAddress + "_connected", false);
         adapters = sharedPreferences.getStringSet("saved_adapters", null);
 
-        if (existingMenuId == -1) {
-            int menuId = (int) (Math.random() * 1000000000);
-            editor.putInt(bluetoothAddress + "_menu_id", menu.add(0, menuId, 0, bluetoothAddress + " Connected").getItemId());
+        if (!existingConnection) {
+//            int menuId = (int) (Math.random() * 1000000000);
+            editor.putBoolean(bluetoothAddress + "_connected", true);
             if (adapters == null) {
                 adapters = new LinkedHashSet<>();
             } else {
@@ -544,11 +544,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             }
         } else {
             setAdaptersToDisconnected();
-            menu.findItem(existingMenuId).setTitle(bluetoothAddress + " Connected");
+            //menu.findItem(existingConnection).setTitle(bluetoothAddress + " Connected");
+
         }
 
-        MenuItem connectMenuItem = menu.findItem(R.id.action_connect);
-        connectMenuItem.setTitle(R.string.disconnect);
+        Button connectButton = (Button) findViewById(R.id.action_connect);
+        connectButton.setText(R.string.disconnect);
         TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
         connectionStatus.setText(getText(R.string.metawear_connected));
 
@@ -562,8 +563,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private void setStatusToDisconnected() {
-        MenuItem connectMenuItem = menu.findItem(R.id.action_connect);
-        connectMenuItem.setTitle(R.string.connect);
+        Button connectButton = (Button) findViewById(R.id.action_connect);
+        connectButton.setText(R.string.connect);
         editor.remove("ble_mac_address");
         editor.commit();
         TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
@@ -572,13 +573,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     public void removeBluetoothFromMenu(String bluetoothAddress) {
         adapters.remove(bluetoothAddress);
-        int menuId = sharedPreferences.getInt(bluetoothAddress + "_menu_id", -1);
-        menu.removeItem(menuId);
+//        int menuId = sharedPreferences.getInt(bluetoothAddress + "_connected", -1);
+//        menu.removeItem(menuId);
         setStatusToDisconnected();
         editor.putStringSet("saved_adapters", adapters);
         editor.apply();
         editor.commit();
-        editor.remove(bluetoothAddress + "_menu_id");
+        editor.remove(bluetoothAddress + "_connected");
         editor.apply();
         editor.commit();
     }
