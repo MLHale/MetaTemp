@@ -1,11 +1,14 @@
 package com.example.student.metatemp;
 
+import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Base64;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.mbientlab.metawear.AsyncOperation;
 import com.mbientlab.metawear.Message;
@@ -65,9 +68,10 @@ public class ThermistorFragment extends Fragment {
     private Logging loggingModule;
     private Editor editor;
     private MetaWearBoard mwBoard;
-//    private ThermistorFragment.ThermistorCallback thermistorCallback;
-//    private SharedPreferences sharedPreferences;
-    private final int TIME_DELAY_PERIOD = 60000;
+    private ThermistorFragment.ThermistorCallback thermistorCallback;
+    private SharedPreferences sharedPreferences;
+    private final int TIME_DELAY_PERIOD = 1000;
+    private MainActivity activity;
 
     public interface ThermistorCallback {
         void startDownload();
@@ -80,20 +84,20 @@ public class ThermistorFragment extends Fragment {
 
 //        GraphFragment getGraphFragment();
     }
-//
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        thermistorCallback = (ThermistorFragment.ThermistorCallback) getActivity();
-//    }
 
-    private final RouteManager.MessageHandler loggingMessageHandler =  new RouteManager.MessageHandler() {
+    @Override
+    public void onResume() {
+        super.onResume();
+        thermistorCallback = (ThermistorFragment.ThermistorCallback) getActivity();
+    }
+
+    private final RouteManager.MessageHandler loggingMessageHandler = new RouteManager.MessageHandler() {
         @Override
         public void process(Message msg) {
-            Log.i("MainActivity", String.format("Ext thermistor: %.3fC",
-
-                    msg.getData(Float.class)));
+            Log.i("MainActivity", String.format("Ext thermistor: %.3fC", msg.getData(Float.class)));
             java.sql.Date date = new java.sql.Date(msg.getTimestamp().getTimeInMillis());
+            TextView temptext = (TextView) getActivity().findViewById(R.id.temperature);
+            temptext.setText(msg.getData(Float.class).intValue() + "°");
 //            TemperatureSample sample = new TemperatureSample(date,  msg.getData(Float.class).longValue(), mwBoard.getMacAddress());
 //            sample.save();
         }
@@ -128,6 +132,12 @@ public class ThermistorFragment extends Fragment {
             }
 
         }
+
+        @Override
+        public void failure(Throwable error) {
+            Log.e("AsyncResult", "Error in CompletionHandler",
+                    error);
+        }
     };
 
     public boolean setupThermistorAndLogs(MetaWearBoard mwBoard, Editor editor) {
@@ -155,50 +165,49 @@ public class ThermistorFragment extends Fragment {
         }
         return true;
     }
-//
-//    public void startLogDownload(MetaWearBoard mwBoard, SharedPreferences sharedPreferences) {
-//        /*
-//           Before actually calling the downloadLog method, we will first gather the required
-//           data to compute the log timestamps and setup progress notifications.
-//           This means we will call downloadLog in one of the logging callback functions, and
-//           will start the callback chain here
-//         */
-//
-//        this.sharedPreferences = sharedPreferences;
-//        this.mwBoard = mwBoard;
-//
-//        try {
-//            loggingModule = mwBoard.getModule(Logging.class);
-//            loggingModule.startLogging();
-//            tempModule = mwBoard.getModule(MultiChannelTemperature.class);
-//        }catch (UnsupportedModuleException e){
-//            Log.e("Thermistor Fragment", e.toString());
-//        }
-//
-//        RouteManager route = mwBoard.getRouteManager(sharedPreferences.getInt(mwBoard.getMacAddress() + "_log_id", 0));
-//        route.setLogMessageHandler("log_stream", loggingMessageHandler);
-//
-//        loggingModule.downloadLog((float)0.1, new Logging.DownloadHandler() {
-//            @Override
-//            public void onProgressUpdate(int nEntriesLeft, int totalEntries) {
-//                Log.i("Thermistor", String.format("Progress= %d / %d", nEntriesLeft,
-//                        totalEntries));
-//                //mwController.waitToClose(false);
-//                thermistorCallback.totalDownloadEntries(totalEntries);
-//                thermistorCallback.downloadProgress(totalEntries - nEntriesLeft);
-//                if(nEntriesLeft == 0) {
+
+    public void startLogDownload(MetaWearBoard mwBoard, SharedPreferences sharedPreferences) {
+        /*
+           Before actually calling the downloadLog method, we will first gather the required
+           data to compute the log timestamps and setup progress notifications.
+           This means we will call downloadLog in one of the logging callback functions, and
+           will start the callback chain here
+         */
+
+        this.sharedPreferences = sharedPreferences;
+        this.mwBoard = mwBoard;
+
+        try {
+            loggingModule = mwBoard.getModule(Logging.class);
+            loggingModule.startLogging();
+            tempModule = mwBoard.getModule(MultiChannelTemperature.class);
+        }catch (UnsupportedModuleException e){
+            Log.e("Thermistor Fragment", e.toString());
+        }
+
+        RouteManager route = mwBoard.getRouteManager(sharedPreferences.getInt(mwBoard.getMacAddress() + "_log_id", 0));
+        route.setLogMessageHandler("log_stream", loggingMessageHandler);
+
+        loggingModule.downloadLog((float)0.1, new Logging.DownloadHandler() {
+            @Override
+            public void onProgressUpdate(int nEntriesLeft, int totalEntries) {
+                Log.i("Thermistor", String.format("Progress= %d / %d", nEntriesLeft,
+                        totalEntries));
+                thermistorCallback.totalDownloadEntries(totalEntries);
+                thermistorCallback.downloadProgress(totalEntries - nEntriesLeft);
+                if(nEntriesLeft == 0) {
 //                    GraphFragment graphFragment = thermistorCallback.getGraphFragment();
 //                    graphFragment.updateGraph();
-//                    thermistorCallback.downloadFinished();
-//                }
-//            }
-//        });
-//        getActivity().runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//                thermistorCallback.startDownload();
-//            }
-//        });
-//    }
+                    thermistorCallback.downloadFinished();
+                }
+            }
+        });
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                thermistorCallback.startDownload();
+            }
+        });
+    }
 }

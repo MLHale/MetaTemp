@@ -218,6 +218,19 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         }
     }
 
+    public void refreshAction(View view) {
+        if (mwBoard == null) {
+            Toast.makeText(getApplicationContext(), R.string.toast_disconnected, Toast.LENGTH_SHORT).show();
+        } else if (!mwBoard.isConnected()) {
+            Log.i("Main Activity", "connecting");
+            mwBoard.connect();
+            refresh = true;
+        } else {
+            Log.i("Main Activity", "staring download");
+            thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
+        }
+    }
+
 
     /**
      * lifecycle methods
@@ -452,7 +465,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 }
             } else if (refresh) {
                 refresh = false;
-//                thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
+                thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
             } else if (reset) {
                 try {
                     mwBoard.getModule(Debug.class).resetDevice();

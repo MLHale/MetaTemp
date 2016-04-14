@@ -35,6 +35,14 @@
     <!--android:layout_below="@+id/meta_wear_title"-->
     <!--android:layout_toEndOf="@+id/mw_board_icon"-->
 
+    <Button
+        android:id="@+id/action_refresh"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:text="refresh"
+        android:layout_below="@+id/connection_status"
+        android:onClick="refreshAction" />
+
     <RelativeLayout
         android:id="@+id/circle"
         android:layout_width="match_parent"
@@ -44,7 +52,7 @@
         android:layout_marginTop="50dp" >
 
         <TextView
-            android:id="@+id/large_volume"
+            android:id="@+id/temperature"
             android:layout_width="220dp"
             android:layout_height="220dp"
             android:background="@drawable/ellipse"
