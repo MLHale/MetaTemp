@@ -12,7 +12,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -107,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private boolean reconnect = false;
     private boolean switching = false;
 
+    private Handler msgHandler;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,6 +159,21 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         getApplicationContext().bindService(new Intent(this, MetaWearBleService.class),
                 this, Context.BIND_AUTO_CREATE);
+
+        //set up message handler for ThermistorFragment
+        msgHandler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                Bundle data = msg.getData();
+                String text = data.getString("temp");
+                TextView temptext = (TextView) findViewById(R.id.temperature);
+                temptext.setText(text);
+            }
+        };
+    }
+
+    public Handler getMsgHandler() {
+        return msgHandler;
     }
 
     @Override
@@ -227,7 +246,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             refresh = true;
         } else {
             Log.i("Main Activity", "staring download");
-            thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
+//            thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
+            thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
         }
     }
 
@@ -465,7 +485,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 }
             } else if (refresh) {
                 refresh = false;
-                thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
+//                thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
+                thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
             } else if (reset) {
                 try {
                     mwBoard.getModule(Debug.class).resetDevice();

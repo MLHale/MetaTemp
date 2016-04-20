@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Bundle;
+import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.TextView;
@@ -72,6 +74,7 @@ public class ThermistorFragment extends Fragment {
     private SharedPreferences sharedPreferences;
     private final int TIME_DELAY_PERIOD = 1000;
     private MainActivity activity;
+    private List<MultiChannelTemperature.Source> tempSources = null;
 
     public interface ThermistorCallback {
         void startDownload();
@@ -96,8 +99,9 @@ public class ThermistorFragment extends Fragment {
         public void process(Message msg) {
             Log.i("MainActivity", String.format("Ext thermistor: %.3fC", msg.getData(Float.class)));
             java.sql.Date date = new java.sql.Date(msg.getTimestamp().getTimeInMillis());
-            TextView temptext = (TextView) getActivity().findViewById(R.id.temperature);
-            temptext.setText(msg.getData(Float.class).intValue() + "°");
+
+//            TextView temptext = (TextView) getActivity().findViewById(R.id.temperature);
+//            temptext.setText(msg.getData(Float.class).intValue() + "°");
 //            TemperatureSample sample = new TemperatureSample(date,  msg.getData(Float.class).longValue(), mwBoard.getMacAddress());
 //            sample.save();
         }
@@ -130,7 +134,6 @@ public class ThermistorFragment extends Fragment {
             }catch (UnsupportedModuleException e){
                 Log.e("Temperature Fragment", e.toString());
             }
-
         }
 
         @Override
@@ -188,14 +191,14 @@ public class ThermistorFragment extends Fragment {
         RouteManager route = mwBoard.getRouteManager(sharedPreferences.getInt(mwBoard.getMacAddress() + "_log_id", 0));
         route.setLogMessageHandler("log_stream", loggingMessageHandler);
 
-        loggingModule.downloadLog((float)0.1, new Logging.DownloadHandler() {
+        loggingModule.downloadLog((float) 0.1, new Logging.DownloadHandler() {
             @Override
             public void onProgressUpdate(int nEntriesLeft, int totalEntries) {
                 Log.i("Thermistor", String.format("Progress= %d / %d", nEntriesLeft,
                         totalEntries));
                 thermistorCallback.totalDownloadEntries(totalEntries);
                 thermistorCallback.downloadProgress(totalEntries - nEntriesLeft);
-                if(nEntriesLeft == 0) {
+                if (nEntriesLeft == 0) {
 //                    GraphFragment graphFragment = thermistorCallback.getGraphFragment();
 //                    graphFragment.updateGraph();
                     thermistorCallback.downloadFinished();
@@ -207,6 +210,50 @@ public class ThermistorFragment extends Fragment {
             public void run() {
 
                 thermistorCallback.startDownload();
+            }
+        });
+    }
+
+    public void getCurrentTemp(MetaWearBoard mwBoard, SharedPreferences sharedPreferences) {
+        this.sharedPreferences = sharedPreferences;
+        this.mwBoard = mwBoard;
+
+        try {
+            tempModule = mwBoard.getModule(MultiChannelTemperature.class);
+            tempSources = tempModule.getSources();
+        }catch (UnsupportedModuleException e){
+            Log.e("Thermistor Fragment", e.toString());
+            return;
+        }
+
+        // Route data from the nrf soc temperature sensor
+        tempModule.routeData()
+                .fromSource(tempSources.get(MultiChannelTemperature.MetaWearRChannel.NRF_DIE)).stream("temp_nrf_stream")
+                .commit().onComplete(new AsyncOperation.CompletionHandler<RouteManager>() {
+
+            public void success(RouteManager result) {
+                result.subscribe("temp_nrf_stream", new RouteManager.MessageHandler() {
+                    @Override
+                    public void process(Message msg) {
+                        Log.i("ThermFrag_GetCurTemp", String.format("Ext thermistor: %.3fC",
+                                msg.getData(Float.class)));
+                        Float t = msg.getData(Float.class);
+                        t = ((t - 32) * 5) / 9; //convert to Fahrenheit
+                        String text = Math.round(t) + "°";
+                        Handler mHandler = ((MainActivity) getActivity()).getMsgHandler();
+                        android.os.Message mesg = mHandler.obtainMessage();
+                        Bundle data = new Bundle();
+                        data.putString("temp", text);
+                        mesg.setData(data);
+                        mHandler.sendMessage(mesg);
+//                        TextView temptext = (TextView) getActivity().findViewById(R.id.temperature);
+//                        temptext.setText(msg.getData(Float.class).intValue() + "°");
+//                        System.err.println(msg.getData(Float.class).intValue() + "°");
+                    }
+                });
+
+                // Read temperature from the NRF soc chip
+                //tempModule.readTemperature(tempSources.get(MultiChannelTemperature.MetaWearRChannel.NRF_DIE));
             }
         });
     }

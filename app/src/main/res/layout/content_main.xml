@@ -57,7 +57,7 @@
             android:layout_height="220dp"
             android:background="@drawable/ellipse"
             android:gravity="center"
-            android:text="55°"
+            android:text="0°"
             android:textColor="#FFFFFF"
             android:textSize="75dp" />
 
