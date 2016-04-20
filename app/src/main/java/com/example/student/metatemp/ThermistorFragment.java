@@ -72,7 +72,7 @@ public class ThermistorFragment extends Fragment {
     private MetaWearBoard mwBoard;
     private ThermistorFragment.ThermistorCallback thermistorCallback;
     private SharedPreferences sharedPreferences;
-    private final int TIME_DELAY_PERIOD = 1000;
+    private final int TIME_DELAY_PERIOD = 3000;
     private MainActivity activity;
     private List<MultiChannelTemperature.Source> tempSources = null;
 
@@ -238,7 +238,7 @@ public class ThermistorFragment extends Fragment {
                         Log.i("ThermFrag_GetCurTemp", String.format("Ext thermistor: %.3fC",
                                 msg.getData(Float.class)));
                         Float t = msg.getData(Float.class);
-                        t = ((t - 32) * 5) / 9; //convert to Fahrenheit
+                        t = (t * 9/5.0f) +32; //convert to Fahrenheit
                         String text = Math.round(t) + "°";
                         Handler mHandler = ((MainActivity) getActivity()).getMsgHandler();
                         android.os.Message mesg = mHandler.obtainMessage();
