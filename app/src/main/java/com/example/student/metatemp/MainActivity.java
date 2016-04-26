@@ -11,10 +11,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private MetaWearBleService.LocalBinder mwBinder = null;
     private MetaWearBoard mwBoard = null;
     private MWScannerFragment mwScannerFragment = null;
-    private ThermistorFragment thermistorFragment = null;
+    //private ThermistorFragment thermistorFragment = null;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private BluetoothDevice bluetoothDevice;
@@ -110,6 +112,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private boolean switching = false;
 
     private Handler msgHandler;
+    private ThermistorService thermService;
+    private boolean thermBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,13 +130,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         /** boilerplate code to create new or use existing fragment */
         if (savedInstanceState == null) {
 //            MainFragment mainFragment = new MainFragment();
-            thermistorFragment = new ThermistorFragment();
+            //thermistorFragment = new ThermistorFragment();
 //            getFragmentManager().beginTransaction().add(R.id.container, mainFragment)
 //                    .add(R.id.container, thermistorFragment, ACCELEROMETER_FRAGMENT_KEY).commit();
-            getFragmentManager().beginTransaction().add(R.id.main_container, thermistorFragment, ACCELEROMETER_FRAGMENT_KEY).commit();
+            //getFragmentManager().beginTransaction().add(R.id.main_container, thermistorFragment, ACCELEROMETER_FRAGMENT_KEY).commit();
 //            mGraphFragment = (GraphFragment) getFragmentManager().findFragmentById(R.id.graph);
         } else {
-            thermistorFragment = (ThermistorFragment) getFragmentManager().getFragment(savedInstanceState, ACCELEROMETER_FRAGMENT_KEY);
+            //thermistorFragment = (ThermistorFragment) getFragmentManager().getFragment(savedInstanceState, ACCELEROMETER_FRAGMENT_KEY);
 //            mGraphFragment = (GraphFragment) getFragmentManager().getFragment(savedInstanceState, GRAPH_FRAGMENT_KEY);
         }
 
@@ -247,7 +251,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         } else {
             Log.i("Main Activity", "staring download");
 //            thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
-            thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
+            //thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
+            thermService.getCurrentTemp(mwBoard, sharedPreferences);
         }
     }
 
@@ -264,19 +269,45 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             addBluetoothToMenuAndConnectionStatus(bleMacAddress);
         }
 
-        thermistorFragment = (ThermistorFragment) getFragmentManager().findFragmentByTag(ACCELEROMETER_FRAGMENT_KEY);
+        //thermistorFragment = (ThermistorFragment) getFragmentManager().findFragmentByTag(ACCELEROMETER_FRAGMENT_KEY);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        // Bind to LocalService
+        Intent intent = new Intent(this, ThermistorService.class);
+        intent.putExtra("handlerExtra", new Messenger(msgHandler));
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        // Unbind from the service
+        if (thermBound) {
+            unbindService(mConnection);
+            thermBound = false;
+        }
     }
 
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            System.err.println("in onServiceConnected");
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            ThermistorService.ThermBinder binder = (ThermistorService.ThermBinder) service;
+            thermService = binder.getService();
+            thermBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            thermBound = false;
+        }
+    };
 
     @Override
     public void onDestroy() {
@@ -349,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
      */
 
     public void pairDevice() {
-        if (thermistorFragment.setupThermistorAndLogs(mwBoard, editor)) {
+        if (thermService.setupThermistorAndLogs(mwBoard, editor)) {
             addBluetoothToMenuAndConnectionStatus(bluetoothDevice.getAddress());
         } else {
             Toast.makeText(getApplicationContext(), R.string.thermistor_not_supported, Toast.LENGTH_SHORT).show();
@@ -486,7 +517,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             } else if (refresh) {
                 refresh = false;
 //                thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
-                thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
+                //thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
+                thermService.getCurrentTemp(mwBoard, sharedPreferences);
             } else if (reset) {
                 try {
                     mwBoard.getModule(Debug.class).resetDevice();

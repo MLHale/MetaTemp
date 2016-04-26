@@ -194,7 +194,7 @@ public class ThermistorFragment extends Fragment {
         loggingModule.downloadLog((float) 0.1, new Logging.DownloadHandler() {
             @Override
             public void onProgressUpdate(int nEntriesLeft, int totalEntries) {
-                Log.i("Thermistor", String.format("Progress= %d / %d", nEntriesLeft,
+                Log.i("Thermistor Fragment", String.format("Progress= %d / %d", nEntriesLeft,
                         totalEntries));
                 thermistorCallback.totalDownloadEntries(totalEntries);
                 thermistorCallback.downloadProgress(totalEntries - nEntriesLeft);
