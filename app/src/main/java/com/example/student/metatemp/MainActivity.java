@@ -222,6 +222,15 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             editor.putString(mwBoard.getMacAddress(), new String(mwBoard.serializeState()));
             editor.apply();
             editor.commit();
+            try {
+                Debug debug = mwBoard.getModule(Debug.class);
+                if (debug != null) {
+                    System.err.println("Resetting Device!");
+                    debug.resetDevice();
+                }
+            } catch (UnsupportedModuleException e){
+                Log.e("connectAction", e.toString());
+            }
             disconnectAdapter();
             if (adapters != null) {
                 setAdaptersToDisconnected();
@@ -296,7 +305,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            System.err.println("in onServiceConnected");
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             ThermistorService.ThermBinder binder = (ThermistorService.ThermBinder) service;
             thermService = binder.getService();
@@ -504,6 +512,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 if ((adapters == null) || !adapters.contains(mwBoard.getMacAddress())) {
                     MWDeviceConfirmFragment mwDeviceConfirmFragment = new MWDeviceConfirmFragment();
                     mwDeviceConfirmFragment.flashDeviceLight(mwBoard, getFragmentManager());
+                    thermService.getCurrentTemp(mwBoard, sharedPreferences);
                     btDeviceSelected = false;
                 } else {
                     runOnUiThread(new Runnable() {
