@@ -40,6 +40,9 @@
         based on your message history
     </string>
 
+    <string name="pref_title_low_threshold">Low Threshold</string>
+    <string name="pref_title_high_threshold">High Threshold</string>
+
     <string name="pref_title_display_name">Display name</string>
     <string name="pref_default_display_name">John Smith</string>
 
