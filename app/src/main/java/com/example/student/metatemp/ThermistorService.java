@@ -229,7 +229,7 @@ public class ThermistorService extends Service {
                                 msg.getData(Float.class)));
                         Float t = msg.getData(Float.class);
                         t = (t * 9/5.0f) +32; //convert to Fahrenheit
-                        String text = Math.round(t) + "°";
+                        String text = Math.round(t) + "";
                         // TODO: IMPLEMENT THE BELOW
 //                        Handler mHandler = ((MainActivity) getActivity()).getMsgHandler();
 //                        android.os.Message mesg = mHandler.obtainMessage();

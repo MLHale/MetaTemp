@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -130,12 +131,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         loThresh = Integer.parseInt(settings.getString("low", "-1"));
         hiThresh = Integer.parseInt(settings.getString("high", "-1"));
-        
-        GradientDrawable ellipse = (GradientDrawable) getDrawable(R.drawable.ellipse);
-        ellipse.setColor(getResources().getColor(R.color.colorAccent));
-        TextView textView = (TextView) findViewById(R.id.temperature);
-        textView.setBackground(ellipse);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -186,8 +181,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 Bundle data = msg.getData();
                 String text = data.getString("temp");
                 TextView temptext = (TextView) findViewById(R.id.temperature);
-                temptext.setText(text);
-                System.err.println(hiThresh + " " + loThresh);
+                temptext.setText(text + "°");
+
+                int bgColor = determineColor(Integer.parseInt(text));
+                GradientDrawable ellipse = (GradientDrawable) getDrawable(R.drawable.ellipse);
+                ellipse.setColor(bgColor);
+                TextView textView = (TextView) findViewById(R.id.temperature);
+                textView.setBackground(ellipse);
             }
         };
     }
@@ -694,5 +694,32 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     public Menu getMenu() {
         return menu;
+    }
+
+    private int determineColor(int temp) {
+        int r,g,b;
+        int difference = hiThresh - loThresh;
+        int numSteps,stepSize,s;
+        if (difference < 10) {
+            numSteps = difference;
+            stepSize = 1;
+        } else {
+            numSteps = 10;
+            stepSize = difference / numSteps;
+        }
+        s = ((temp - loThresh) * numSteps) / difference;
+        System.err.println(s);
+
+        // Low: R=0, G=200, B=200
+        // High: R=255, G=25, B=0
+        r = linearInterpolation(0, 255, s, numSteps);
+        g = linearInterpolation(200, 25, s, numSteps);
+        b = linearInterpolation(200, 0, s, numSteps);
+        return Color.rgb(r, g, b);
+    }
+
+    private int linearInterpolation(int start, int end, int step, int steps) {
+        // http://forum.arduino.cc/index.php?topic=194002.0
+        return (end - start) * step / steps + start;
     }
 }
