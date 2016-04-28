@@ -3,24 +3,22 @@
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
     <EditTextPreference
-        android:defaultValue="40"
+        android:defaultValue="@string/pref_default_low_threshold"
         android:inputType="number"
         android:numeric="integer"
         android:key="low"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:summary="%d°"
         android:title="@string/pref_title_low_threshold" />
     <EditTextPreference
-        android:defaultValue="80"
+        android:defaultValue="@string/pref_default_high_threshold"
         android:inputType="number"
         android:numeric="integer"
         android:key="high"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"
-        android:summary="%d°"
         android:title="@string/pref_title_high_threshold" />
 
     <!-- A 'parent' preference, which enables/disables child preferences (below)

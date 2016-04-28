@@ -119,7 +119,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements
 
         switch (item.getItemId()) {
             case android.R.id.home:
-                System.err.println(this);
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
             case R.id.action_home:

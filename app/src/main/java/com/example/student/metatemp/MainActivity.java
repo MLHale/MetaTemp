@@ -11,12 +11,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -110,10 +115,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private boolean reset = false;
     private boolean reconnect = false;
     private boolean switching = false;
-
     private Handler msgHandler;
     private ThermistorService thermService;
     private boolean thermBound = false;
+    private int loThresh;
+    private int hiThresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,6 +127,15 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         setContentView(R.layout.activity_main);
         sharedPreferences = getApplicationContext().getSharedPreferences("com.mbientlab.temptracker", 0); // 0 - for private mode
         editor = sharedPreferences.edit();
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        loThresh = Integer.parseInt(settings.getString("low", "-1"));
+        hiThresh = Integer.parseInt(settings.getString("high", "-1"));
+        
+        GradientDrawable ellipse = (GradientDrawable) getDrawable(R.drawable.ellipse);
+        ellipse.setColor(getResources().getColor(R.color.colorAccent));
+        TextView textView = (TextView) findViewById(R.id.temperature);
+        textView.setBackground(ellipse);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -172,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 String text = data.getString("temp");
                 TextView temptext = (TextView) findViewById(R.id.temperature);
                 temptext.setText(text);
+                System.err.println(hiThresh + " " + loThresh);
             }
         };
     }
