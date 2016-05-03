@@ -126,11 +126,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        sharedPreferences = getApplicationContext().getSharedPreferences("com.mbientlab.temptracker", 0); // 0 - for private mode
+        sharedPreferences = getApplicationContext().getSharedPreferences("com.example.student.metatemp_preferences", 0); // 0 - for private mode
         editor = sharedPreferences.edit();
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-        loThresh = Integer.parseInt(settings.getString("low", "-1"));
-        hiThresh = Integer.parseInt(settings.getString("high", "-1"));
+        //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+        loThresh = Integer.parseInt(sharedPreferences.getString("low", "-1"));
+        hiThresh = Integer.parseInt(sharedPreferences.getString("high", "-1"));
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -521,6 +521,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                               @Override
                               public void run() {
                                   Toast.makeText(getApplicationContext(), R.string.toast_connected, Toast.LENGTH_SHORT).show();
+                                  thermService.getCurrentTemp(mwBoard, sharedPreferences);
                               }
                           }
             );
@@ -708,7 +709,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             stepSize = difference / numSteps;
         }
         s = ((temp - loThresh) * numSteps) / difference;
-        System.err.println(s);
 
         // Low: R=0, G=200, B=200
         // High: R=255, G=25, B=0
