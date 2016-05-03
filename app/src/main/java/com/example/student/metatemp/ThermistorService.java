@@ -1,6 +1,8 @@
 package com.example.student.metatemp;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.Context;
@@ -11,6 +13,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
+import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.mbientlab.metawear.AsyncOperation;
@@ -33,21 +38,13 @@ public class ThermistorService extends Service {
     private MultiChannelTemperature tempModule;
     private Logging loggingModule;
     private SharedPreferences.Editor editor;
+    private SharedPreferences sharedPreferences;
     private MetaWearBoard mwBoard;
     private ThermistorFragment.ThermistorCallback thermistorCallback;
-    private SharedPreferences sharedPreferences;
     private final int TIME_DELAY_PERIOD = 3000;
     private MainActivity activity;
     private List<MultiChannelTemperature.Source> tempSources = null;
     private Messenger tMessenger;
-
-    // TODO: Rename actions
-    private static final String ACTION_FOO = "com.example.student.metatemp.action.FOO";
-    private static final String ACTION_BAZ = "com.example.student.metatemp.action.BAZ";
-
-    // TODO: Rename parameters
-    private static final String EXTRA_PARAM1 = "com.example.student.metatemp.extra.PARAM1";
-    private static final String EXTRA_PARAM2 = "com.example.student.metatemp.extra.PARAM2";
 
 //    public ThermistorService() { super("ThermistorService"); }
     public ThermistorService() {
@@ -62,6 +59,7 @@ public class ThermistorService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        this.sharedPreferences = getApplicationContext().getSharedPreferences("com.example.student.metatemp_preferences", 0); // 0 - for private mode
         Bundle extras = intent.getExtras();
         if (extras != null) {
             tMessenger = (Messenger)extras.get("handlerExtra");
@@ -69,70 +67,6 @@ public class ThermistorService extends Service {
 
         return tBinder;
     }
-
-//    /**
-//     * Starts this service to perform action Foo with the given parameters. If
-//     * the service is already performing a task this action will be queued.
-//     *
-//     * @see IntentService
-//     */
-//    // TODO: Customize helper method
-//    public static void startActionFoo(Context context, String param1, String param2) {
-//        Intent intent = new Intent(context, ThermistorService.class);
-//        intent.setAction(ACTION_FOO);
-//        intent.putExtra(EXTRA_PARAM1, param1);
-//        intent.putExtra(EXTRA_PARAM2, param2);
-//        context.startService(intent);
-//    }
-//
-//    /**
-//     * Starts this service to perform action Baz with the given parameters. If
-//     * the service is already performing a task this action will be queued.
-//     *
-//     * @see IntentService
-//     */
-//    // TODO: Customize helper method
-//    public static void startActionBaz(Context context, String param1, String param2) {
-//        Intent intent = new Intent(context, ThermistorService.class);
-//        intent.setAction(ACTION_BAZ);
-//        intent.putExtra(EXTRA_PARAM1, param1);
-//        intent.putExtra(EXTRA_PARAM2, param2);
-//        context.startService(intent);
-//    }
-//
-//    @Override
-//    protected void onHandleIntent(Intent intent) {
-//        if (intent != null) {
-//            final String action = intent.getAction();
-//            if (ACTION_FOO.equals(action)) {
-//                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-//                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-//                handleActionFoo(param1, param2);
-//            } else if (ACTION_BAZ.equals(action)) {
-//                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-//                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-//                handleActionBaz(param1, param2);
-//            }
-//        }
-//    }
-//
-//    /**
-//     * Handle action Foo in the provided background thread with the provided
-//     * parameters.
-//     */
-//    private void handleActionFoo(String param1, String param2) {
-//        // TODO: Handle action Foo
-//        throw new UnsupportedOperationException("Not yet implemented");
-//    }
-//
-//    /**
-//     * Handle action Baz in the provided background thread with the provided
-//     * parameters.
-//     */
-//    private void handleActionBaz(String param1, String param2) {
-//        // TODO: Handle action Baz
-//        throw new UnsupportedOperationException("Not yet implemented");
-//    }
 
     private final RouteManager.MessageHandler loggingMessageHandler = new RouteManager.MessageHandler() {
         @Override
@@ -204,9 +138,14 @@ public class ThermistorService extends Service {
         return true;
     }
 
-    public void getCurrentTemp(MetaWearBoard mwBoard, SharedPreferences sharedPreferences) {
-        this.sharedPreferences = sharedPreferences;
+    public void getCurrentTemp(MetaWearBoard mwBoard) {
         this.mwBoard = mwBoard;
+        final Context context = this;
+        final int loThresh = Integer.parseInt(sharedPreferences.getString("low", "-1"));
+        final int hiThresh = Integer.parseInt(sharedPreferences.getString("high", "-1"));
+        final boolean doNotify = sharedPreferences.getBoolean("notifications_new_message", false);
+        final String doRingtone = sharedPreferences.getString("notifications_new_message_ringtone", "");
+        final boolean doVibrate = sharedPreferences.getBoolean("notifications_new_message_vibrate", false);
 
         try {
             tempModule = mwBoard.getModule(MultiChannelTemperature.class);
@@ -230,19 +169,62 @@ public class ThermistorService extends Service {
                         Float t = msg.getData(Float.class);
                         t = (t * 9/5.0f) +32; //convert to Fahrenheit
                         String text = Math.round(t) + "";
-                        // TODO: IMPLEMENT THE BELOW
-//                        Handler mHandler = ((MainActivity) getActivity()).getMsgHandler();
-//                        android.os.Message mesg = mHandler.obtainMessage();
+
+                        // Send message to MainActivity
                         android.os.Message mesg = android.os.Message.obtain(null, 1, 0, 0);
                         Bundle data = new Bundle();
                         data.putString("temp", text);
                         mesg.setData(data);
-//                        mHandler.sendMessage(mesg);
                         try {
                             tMessenger.send(mesg);
                         } catch (RemoteException e) {
                             e.printStackTrace();
                         }
+
+                        if (t < loThresh || t > hiThresh) {
+                            // Notification
+                            if (doNotify) {
+                                NotificationCompat.Builder nBuilder;
+                                int nId = 731119; // So can update the notification later
+                                if (t < loThresh) {
+                                    nBuilder =
+                                            new NotificationCompat.Builder(context)
+                                                    .setSmallIcon(R.drawable.ic_ac_unit_white_24dp)
+                                                    .setContentTitle("Too Cold!")
+                                                    .setContentText("MetaWear Current Temperature: " + text);
+                                } else {
+                                    nBuilder =
+                                            new NotificationCompat.Builder(context)
+                                                    .setSmallIcon(R.drawable.ic_whatshot_white_24dp)
+                                                    .setContentTitle("Too Hot!")
+                                                    .setContentText("MetaWear Current Temperature: " + text);
+                                }
+
+                                // Create an explicit intent for an Activity in your app
+                                Intent resultIntent = new Intent(context, MainActivity.class);
+
+                                // The stack builder object will contain an artificial back stack for the
+                                // started Activity.
+                                // This ensures that navigating backward from the Activity leads out of
+                                // your application to the Home screen.
+                                TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+                                // Add the back stack for the Intent (but not the Intent itself)
+                                stackBuilder.addParentStack(MainActivity.class);
+                                // Add the Intent that starts the Activity to top of stack
+                                stackBuilder.addNextIntent(resultIntent);
+                                PendingIntent resultPendingIntent =
+                                        stackBuilder.getPendingIntent(
+                                                0,
+                                                PendingIntent.FLAG_UPDATE_CURRENT
+                                        );
+                                nBuilder.setContentIntent(resultPendingIntent);
+                                NotificationManager mNotificationManager =
+                                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                                mNotificationManager.notify(nId, nBuilder.build());
+                            }
+
+                        }
+
                     }
                 });
             }

@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         setContentView(R.layout.activity_main);
         sharedPreferences = getApplicationContext().getSharedPreferences("com.example.student.metatemp_preferences", 0); // 0 - for private mode
         editor = sharedPreferences.edit();
-        //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
         loThresh = Integer.parseInt(sharedPreferences.getString("low", "-1"));
         hiThresh = Integer.parseInt(sharedPreferences.getString("high", "-1"));
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -277,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             Log.i("Main Activity", "staring download");
 //            thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
             //thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
-            thermService.getCurrentTemp(mwBoard, sharedPreferences);
+            thermService.getCurrentTemp(mwBoard);
         }
     }
 
@@ -521,7 +520,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                               @Override
                               public void run() {
                                   Toast.makeText(getApplicationContext(), R.string.toast_connected, Toast.LENGTH_SHORT).show();
-                                  thermService.getCurrentTemp(mwBoard, sharedPreferences);
+                                  thermService.getCurrentTemp(mwBoard);
                               }
                           }
             );
@@ -529,7 +528,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 if ((adapters == null) || !adapters.contains(mwBoard.getMacAddress())) {
                     MWDeviceConfirmFragment mwDeviceConfirmFragment = new MWDeviceConfirmFragment();
                     mwDeviceConfirmFragment.flashDeviceLight(mwBoard, getFragmentManager());
-                    thermService.getCurrentTemp(mwBoard, sharedPreferences);
+                    thermService.getCurrentTemp(mwBoard);
                     btDeviceSelected = false;
                 } else {
                     runOnUiThread(new Runnable() {
@@ -544,7 +543,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 refresh = false;
 //                thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
                 //thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
-                thermService.getCurrentTemp(mwBoard, sharedPreferences);
+                thermService.getCurrentTemp(mwBoard);
             } else if (reset) {
                 try {
                     mwBoard.getModule(Debug.class).resetDevice();
