@@ -121,6 +121,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private boolean thermBound = false;
     private int loThresh;
     private int hiThresh;
+    private int loColor;
+    private int hiColor;
+    private int loLimitColor;
+    private int hiLimitColor;
+    private int defaultColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +140,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         ProgressBar progress = (ProgressBar) findViewById(R.id.progressBar);
         progress.setScaleY(5f);
+
+        loColor = getResources().getColor(R.color.colorLow);
+        hiColor = getResources().getColor(R.color.colorHigh);
+        loLimitColor = getResources().getColor(R.color.colorLowThresh);
+        hiLimitColor = getResources().getColor(R.color.colorHighThresh);
+        defaultColor = getResources().getColor(R.color.colorDefault);
 
         /** boilerplate code to create new or use existing fragment */
         if (savedInstanceState == null) {
@@ -697,28 +708,20 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     private int determineColor(int temp) {
-        int r,g,b;
         int difference = hiThresh - loThresh;
-        int numSteps,stepSize,s;
-        if (difference < 10) {
-            numSteps = difference;
-            stepSize = 1;
-        } else {
-            numSteps = 10;
-            stepSize = difference / numSteps;
+        if (temp < loThresh) {
+            return loColor;
+        } else if (temp > hiThresh) {
+            return hiColor;
         }
-        s = ((temp - loThresh) * numSteps) / difference;
 
-        // Low: R=0, G=200, B=200
-        // High: R=255, G=25, B=0
-        r = linearInterpolation(0, 255, s, numSteps);
-        g = linearInterpolation(200, 25, s, numSteps);
-        b = linearInterpolation(200, 0, s, numSteps);
-        return Color.rgb(r, g, b);
-    }
+        float threshold = (1/4f) * difference;
+        if (temp < (loThresh + threshold)) {
+            return loLimitColor;
+        } else if (temp > (hiThresh - threshold)) {
+            return hiLimitColor;
+        }
 
-    private int linearInterpolation(int start, int end, int step, int steps) {
-        // http://forum.arduino.cc/index.php?topic=194002.0
-        return (end - start) * step / steps + start;
+        return defaultColor;
     }
 }
