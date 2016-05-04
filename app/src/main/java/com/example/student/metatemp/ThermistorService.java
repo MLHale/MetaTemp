@@ -1,6 +1,7 @@
 package com.example.student.metatemp;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -190,14 +191,16 @@ public class ThermistorService extends Service {
                                     nBuilder =
                                             new NotificationCompat.Builder(context)
                                                     .setSmallIcon(R.drawable.ic_ac_unit_white_24dp)
-                                                    .setContentTitle("Too Cold!")
-                                                    .setContentText("MetaWear Current Temperature: " + text);
+                                                    .setContentTitle("Too Cold!");
                                 } else {
                                     nBuilder =
                                             new NotificationCompat.Builder(context)
                                                     .setSmallIcon(R.drawable.ic_whatshot_white_24dp)
-                                                    .setContentTitle("Too Hot!")
-                                                    .setContentText("MetaWear Current Temperature: " + text);
+                                                    .setContentTitle("Too Hot!");
+                                }
+                                nBuilder = nBuilder.setContentText("MetaWear Current Temperature: " + text);
+                                if (doVibrate) {
+                                    nBuilder = nBuilder.setVibrate(new long[] { 500, 500, 500 });
                                 }
 
                                 // Create an explicit intent for an Activity in your app
@@ -218,9 +221,13 @@ public class ThermistorService extends Service {
                                                 PendingIntent.FLAG_UPDATE_CURRENT
                                         );
                                 nBuilder.setContentIntent(resultPendingIntent);
+                                Notification noti = nBuilder.build();
+                                if (doVibrate) {
+                                    noti.flags |= NotificationCompat.FLAG_ONLY_ALERT_ONCE;
+                                }
                                 NotificationManager mNotificationManager =
                                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                                mNotificationManager.notify(nId, nBuilder.build());
+                                mNotificationManager.notify(nId, noti);
                             }
 
                         }

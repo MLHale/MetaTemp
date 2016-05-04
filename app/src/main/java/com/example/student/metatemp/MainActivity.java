@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private boolean reset = false;
     private boolean reconnect = false;
     private boolean switching = false;
-    private Handler msgHandler;
+    private static Handler msgHandler;
     private ThermistorService thermService;
     private boolean thermBound = false;
     private int loThresh;
