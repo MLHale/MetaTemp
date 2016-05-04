@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -147,6 +148,7 @@ public class ThermistorService extends Service {
         final boolean doNotify = sharedPreferences.getBoolean("notifications_new_message", false);
         final String doRingtone = sharedPreferences.getString("notifications_new_message_ringtone", "");
         final boolean doVibrate = sharedPreferences.getBoolean("notifications_new_message_vibrate", false);
+        System.err.println(doRingtone);
 
         try {
             tempModule = mwBoard.getModule(MultiChannelTemperature.class);
@@ -199,6 +201,7 @@ public class ThermistorService extends Service {
                                                     .setContentTitle("Too Hot!");
                                 }
                                 nBuilder = nBuilder.setContentText("MetaWear Current Temperature: " + text);
+                                nBuilder = nBuilder.setAutoCancel(true);
                                 if (doVibrate) {
                                     nBuilder = nBuilder.setVibrate(new long[] { 500, 500, 500 });
                                 }
@@ -222,8 +225,10 @@ public class ThermistorService extends Service {
                                         );
                                 nBuilder.setContentIntent(resultPendingIntent);
                                 Notification noti = nBuilder.build();
-                                if (doVibrate) {
-                                    noti.flags |= NotificationCompat.FLAG_ONLY_ALERT_ONCE;
+                                noti.flags = NotificationCompat.FLAG_ONLY_ALERT_ONCE; // Only alert on first notification
+                                if (doRingtone != "") {
+                                    // Set notification sound
+                                    noti.sound = Uri.parse(doRingtone);
                                 }
                                 NotificationManager mNotificationManager =
                                         (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
