@@ -1,5 +1,7 @@
 # MetaTemp
 
+MetaTemp is an Android App which interfaces with a [MetaWear board from Mbientlabs](https://mbientlab.com/metawear/) to track the current temperature around the MetaWear. The author has a medical device which does not operate properly in very high or very low temperatures, and wrote this app to be able to detect when the temperature was nearing the threshold when it would stop working. The app can be used in any other situation where extreme temperatures must be detected and avoided. The app displays the current temperature, color-coded depending on how high or low it is. These thresholds can be adjusted by the user in the app's preferences. Notifications may be enabled or disabled, and settings also include vibration and ringtone so the user can choose how to be alerted.
+
 ## Installation Instructions
 
 1. Download [Android Studio](http://developer.android.com/sdk/index.html).
