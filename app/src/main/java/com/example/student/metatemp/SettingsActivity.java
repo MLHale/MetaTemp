@@ -123,10 +123,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements
                 intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
                 return true;
-            case R.id.action_graph:
+            /*case R.id.action_graph:
                 intent = new Intent(this, GraphActivity.class);
                 startActivity(intent);
-                return true;
+                return true;*/
             default:
                 return super.onOptionsItemSelected(item);
         }

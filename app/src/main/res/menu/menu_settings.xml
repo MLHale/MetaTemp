@@ -8,10 +8,10 @@
         android:orderInCategory="10"
         android:title="@string/action_home"
         app:showAsAction="ifRoom" />
-    <item
+    <!--<item
         android:id="@+id/action_graph"
         android:icon="@drawable/ic_timeline_white_24dp"
         android:orderInCategory="50"
         android:title="@string/action_graph"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom" />-->
 </menu>

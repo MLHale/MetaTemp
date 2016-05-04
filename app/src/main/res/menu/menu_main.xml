@@ -2,12 +2,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.student.metatemp.MainActivity">
-    <item
+    <!--<item
         android:id="@+id/action_graph"
         android:icon="@drawable/ic_timeline_white_24dp"
         android:orderInCategory="50"
         android:title="@string/action_graph"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom" />-->
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings_white_24dp"

@@ -131,8 +131,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ProgressBar progress = (ProgressBar) findViewById(R.id.progressBar);
-        progress.setScaleY(5f);
+        /*ProgressBar progress = (ProgressBar) findViewById(R.id.progressBar);
+        progress.setScaleY(5f);*/
 
         loColor = getResources().getColor(R.color.colorLow);
         hiColor = getResources().getColor(R.color.colorHigh);
@@ -204,10 +204,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             case R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
-            case R.id.action_graph:
+            /*case R.id.action_graph:
                 intent = new Intent(this, GraphActivity.class);
                 startActivity(intent);
-                return true;
+                return true;*/
             case R.id.action_settings:
                 intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
