@@ -1,6 +1,5 @@
 package com.example.student.metatemp;
 
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -33,7 +32,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-
 import java.util.List;
 import java.util.prefs.Preferences;
 

@@ -35,7 +35,6 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.mbientlab.bletoolbox.scanner.BleScannerFragment;
 import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard;
@@ -43,7 +42,6 @@ import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard.ConnectionStateHandler;
 import com.mbientlab.metawear.UnsupportedModuleException;
 import com.mbientlab.metawear.module.Debug;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -91,20 +89,16 @@ import java.util.concurrent.locks.Condition;
  * Twitter: @lgleasain
  */
 
-public class MainActivity extends AppCompatActivity implements ServiceConnection, MWDeviceConfirmFragment.DeviceConfirmCallback, /*GraphCallback,*/
-        ThermistorFragment.ThermistorCallback, BleScannerFragment.ScannerCommunicationBus {
+public class MainActivity extends AppCompatActivity implements ServiceConnection,
+        MWDeviceConfirmFragment.DeviceConfirmCallback, BleScannerFragment.ScannerCommunicationBus {
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
      */
-//    private GraphFragment mGraphFragment;
     private final static int REQUEST_ENABLE_BT = 0;
-    private final static String ACCELEROMETER_FRAGMENT_KEY = "AccelerometerFragment.ACCELEROMETER_FRAGMENT_KEY";
-    private final static String GRAPH_FRAGMENT_KEY = "GraphFragment.GRAPH_FRAGMENT_KEY";
     private MetaWearBleService.LocalBinder mwBinder = null;
     private MetaWearBoard mwBoard = null;
     private MWScannerFragment mwScannerFragment = null;
-    //private ThermistorFragment thermistorFragment = null;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private BluetoothDevice bluetoothDevice;
@@ -146,19 +140,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         loLimitColor = getResources().getColor(R.color.colorLowThresh);
         hiLimitColor = getResources().getColor(R.color.colorHighThresh);
         defaultColor = getResources().getColor(R.color.colorDefault);
-
-        /** boilerplate code to create new or use existing fragment */
-        if (savedInstanceState == null) {
-//            MainFragment mainFragment = new MainFragment();
-            //thermistorFragment = new ThermistorFragment();
-//            getFragmentManager().beginTransaction().add(R.id.container, mainFragment)
-//                    .add(R.id.container, thermistorFragment, ACCELEROMETER_FRAGMENT_KEY).commit();
-            //getFragmentManager().beginTransaction().add(R.id.main_container, thermistorFragment, ACCELEROMETER_FRAGMENT_KEY).commit();
-//            mGraphFragment = (GraphFragment) getFragmentManager().findFragmentById(R.id.graph);
-        } else {
-            //thermistorFragment = (ThermistorFragment) getFragmentManager().getFragment(savedInstanceState, ACCELEROMETER_FRAGMENT_KEY);
-//            mGraphFragment = (GraphFragment) getFragmentManager().getFragment(savedInstanceState, GRAPH_FRAGMENT_KEY);
-        }
 
         /** code to set up the bluetooth adapter or give messages if it's not enabled or available */
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -284,9 +265,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             mwBoard.connect();
             refresh = true;
         } else {
-            Log.i("Main Activity", "staring download");
-//            thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
-            //thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
+            Log.i("Main Activity", "starting refresh");
             thermService.getCurrentTemp(mwBoard);
         }
     }
@@ -303,8 +282,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         if (bleMacAddress != null && menu != null) {
             addBluetoothToMenuAndConnectionStatus(bleMacAddress);
         }
-
-        //thermistorFragment = (ThermistorFragment) getFragmentManager().findFragmentByTag(ACCELEROMETER_FRAGMENT_KEY);
     }
 
     @Override
@@ -359,7 +336,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         if (bleMacAddress != null) {
             bluetoothDevice = btAdapter.getRemoteDevice(bleMacAddress);
             connectDevice(bluetoothDevice);
-
         }
     }
 
@@ -432,48 +408,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     /**
-     * Thermistor fragment callbacks
-     *
-     * @return Bluetooth Device
-     */
-//    @Override
-//    public GraphFragment getGraphFragment() {
-//        return mGraphFragment;
-//    }
-
-    @Override
-    public void startDownload() {
-        TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
-        connectionStatus.setText(getText(R.string.metawear_syncing));
-    }
-
-    @Override
-    public void totalDownloadEntries(int entries) {
-//        ProgressBar progressBar = (ProgressBar) findViewById(R.id.download_progress);
-//        progressBar.setMax(entries);
-    }
-
-    @Override
-    public void downloadProgress(int entriesDownloaded) {
-//        ProgressBar progressBar = (ProgressBar) findViewById(R.id.download_progress);
-//        progressBar.setProgress(entriesDownloaded);
-    }
-
-    @Override
-    public void downloadFinished() {
-        mwBoard.disconnect();
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                TextView connectionStatus = (TextView) findViewById(R.id.connection_status);
-                connectionStatus.setText(getText(R.string.metawear_connected));
-//                ProgressBar progressBar = (ProgressBar) findViewById(R.id.download_progress);
-//                progressBar.setProgress(0);
-            }
-        });
-    }
-
-    /**
      * Graph fragment callbacks
      *
      * @return bluetooth Device
@@ -482,11 +416,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public String getBluetoothDevice() {
         return sharedPreferences.getString("ble_mac_address", null);
     }
-
-//    @Override
-//    public void setGraphFragment(GraphFragment graphFragment) {
-//        mGraphFragment = graphFragment;
-//    }
 
     /**
      * private helper method for device connection logic
@@ -552,22 +481,20 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 }
             } else if (refresh) {
                 refresh = false;
-//                thermistorFragment.startLogDownload(mwBoard, sharedPreferences);
-                //thermistorFragment.getCurrentTemp(mwBoard, sharedPreferences);
                 thermService.getCurrentTemp(mwBoard);
             } else if (reset) {
                 try {
                     mwBoard.getModule(Debug.class).resetDevice();
                 } catch (Exception e) {
                     runOnUiThread(
-                            new Runnable() {
-                                @Override
-                                public void run() {
-                                    disconnectAdapter();
-                                    forgetDevice(bluetoothDevice.getAddress());
-                                    Toast.makeText(getApplicationContext(), R.string.error_soft_reset, Toast.LENGTH_SHORT).show();
-                                }
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                disconnectAdapter();
+                                forgetDevice(bluetoothDevice.getAddress());
+                                Toast.makeText(getApplicationContext(), R.string.error_soft_reset, Toast.LENGTH_SHORT).show();
                             }
+                        }
                     );
                 }
                 reset = false;
@@ -584,7 +511,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     @Override
                     public void run() {
                         addBluetoothToMenuAndConnectionStatus(mwBoard.getMacAddress());
-//                        mGraphFragment.updateGraph();
                     }
                 });
             }
@@ -615,8 +541,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     private void setAdaptersToDisconnected() {
         for (String adapter : adapters) {
             boolean connected = sharedPreferences.getBoolean(adapter + "_connected", false);
-//            MenuItem menuItem = menu.findItem(connected);
-//            if (menuItem == null) {
+        //      MenuItem menuItem = menu.findItem(connected);
+        //      if (menuItem == null) {
             if (!connected) {
             //        menu.add(0, connected, 0, adapter).getItemId();
             } else {
@@ -647,7 +573,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         } else {
             setAdaptersToDisconnected();
             //menu.findItem(existingConnection).setTitle(bluetoothAddress + " Connected");
-
         }
 
         Button connectButton = (Button) findViewById(R.id.action_connect);
@@ -687,7 +612,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
     /**
-     * local helper method for disconnecting from a board
+     * Local helper method for disconnecting from a board
      */
     private void disconnectAdapter() {
         mwBoard.disconnect();
@@ -707,6 +632,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         return menu;
     }
 
+    /**
+     * Returns the correct color for a given temperature.
+     * Four colors can be returned based on the following cases;
+     *      - temperature is below the low threshold
+     *      - temperature is above but near the low threshold
+     *      - temperature is above the high threshold
+     *      - temperature is below but near the high threshold
+     */
     private int determineColor(int temp) {
         int difference = hiThresh - loThresh;
         if (temp < loThresh) {

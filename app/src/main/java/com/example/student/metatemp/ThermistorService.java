@@ -19,7 +19,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
 import com.mbientlab.metawear.AsyncOperation;
 import com.mbientlab.metawear.Message;
 import com.mbientlab.metawear.MetaWearBoard;
@@ -42,13 +41,9 @@ public class ThermistorService extends Service {
     private SharedPreferences.Editor editor;
     private SharedPreferences sharedPreferences;
     private MetaWearBoard mwBoard;
-    private ThermistorFragment.ThermistorCallback thermistorCallback;
-    private final int TIME_DELAY_PERIOD = 3000;
-    private MainActivity activity;
     private List<MultiChannelTemperature.Source> tempSources = null;
     private Messenger tMessenger;
 
-//    public ThermistorService() { super("ThermistorService"); }
     public ThermistorService() {
         super();
     }
@@ -70,50 +65,6 @@ public class ThermistorService extends Service {
         return tBinder;
     }
 
-    private final RouteManager.MessageHandler loggingMessageHandler = new RouteManager.MessageHandler() {
-        @Override
-        public void process(Message msg) {
-            Log.i("ThermService", String.format("Ext thermistor: %.3fC", msg.getData(Float.class)));
-//            java.sql.Date date = new java.sql.Date(msg.getTimestamp().getTimeInMillis());
-        }
-    };
-
-    private final AsyncOperation.CompletionHandler<RouteManager> temperatureHandler = new AsyncOperation.CompletionHandler<RouteManager>() {
-        @Override
-        public void success(RouteManager result) {
-            result.setLogMessageHandler("mystream", loggingMessageHandler);
-            editor.putInt(mwBoard.getMacAddress() + "_log_id", result.id());
-            editor.apply();
-            editor.commit();
-
-            // Read temperature from the NRF soc chip
-            try {
-                AsyncOperation<Timer.Controller> taskResult = mwBoard.getModule(Timer.class)
-                        .scheduleTask(new Timer.Task() {
-                            @Override
-                            public void commands() {
-                                tempModule.readTemperature(tempModule.getSources().get(MultiChannelTemperature.MetaWearRChannel.NRF_DIE));
-                            }
-                        }, TIME_DELAY_PERIOD, false);
-                taskResult.onComplete(new AsyncOperation.CompletionHandler<Timer.Controller>() {
-                    @Override
-                    public void success(Timer.Controller result) {
-                        // start executing the task
-                        result.start();
-                    }
-                });
-            }catch (UnsupportedModuleException e){
-                Log.e("Temperature Service", e.toString());
-            }
-        }
-
-        @Override
-        public void failure(Throwable error) {
-            Log.e("AsyncResult", "Error in CompletionHandler",
-                    error);
-        }
-    };
-
     public boolean setupThermistorAndLogs(MetaWearBoard mwBoard, SharedPreferences.Editor editor) {
         this.editor = editor;
         this.mwBoard = mwBoard;
@@ -124,11 +75,6 @@ public class ThermistorService extends Service {
             Log.e("Thermistor Service", e.toString());
             return false;
         }
-
-        List<MultiChannelTemperature.Source> tempSources= tempModule.getSources();
-        MultiChannelTemperature.Source tempSource = tempSources.get(MultiChannelTemperature.MetaWearRChannel.NRF_DIE);
-        tempModule.routeData().fromSource(tempSource).log("log_stream_service")
-                .commit().onComplete(temperatureHandler);
 
         try {
             loggingModule = mwBoard.getModule(Logging.class);
@@ -148,7 +94,6 @@ public class ThermistorService extends Service {
         final boolean doNotify = sharedPreferences.getBoolean("notifications_new_message", false);
         final String doRingtone = sharedPreferences.getString("notifications_new_message_ringtone", "");
         final boolean doVibrate = sharedPreferences.getBoolean("notifications_new_message_vibrate", false);
-        System.err.println(doRingtone);
 
         try {
             tempModule = mwBoard.getModule(MultiChannelTemperature.class);
@@ -219,14 +164,11 @@ public class ThermistorService extends Service {
                                 // Add the Intent that starts the Activity to top of stack
                                 stackBuilder.addNextIntent(resultIntent);
                                 PendingIntent resultPendingIntent =
-                                        stackBuilder.getPendingIntent(
-                                                0,
-                                                PendingIntent.FLAG_UPDATE_CURRENT
-                                        );
+                                        stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
                                 nBuilder.setContentIntent(resultPendingIntent);
                                 Notification noti = nBuilder.build();
                                 noti.flags = NotificationCompat.FLAG_ONLY_ALERT_ONCE; // Only alert on first notification
-                                if (doRingtone != "") {
+                                if (doRingtone.equals("")) {
                                     // Set notification sound
                                     noti.sound = Uri.parse(doRingtone);
                                 }
