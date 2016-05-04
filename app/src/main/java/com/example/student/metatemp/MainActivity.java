@@ -205,8 +205,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             case R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
-            /*case R.id.action_home:
-                return true;*/
             case R.id.action_graph:
                 intent = new Intent(this, GraphActivity.class);
                 startActivity(intent);
@@ -259,13 +257,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     public void refreshAction(View view) {
         if (mwBoard == null) {
+            Log.i("Main Activity Refresh", "mwBoard is null");
             Toast.makeText(getApplicationContext(), R.string.toast_disconnected, Toast.LENGTH_SHORT).show();
         } else if (!mwBoard.isConnected()) {
-            Log.i("Main Activity", "connecting");
+            Log.i("Main Activity Refresh", "connecting");
             mwBoard.connect();
             refresh = true;
         } else {
-            Log.i("Main Activity", "starting refresh");
+            Log.i("Main Activity Refresh", "starting refresh");
             thermService.getCurrentTemp(mwBoard);
         }
     }
@@ -277,9 +276,12 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     protected void onResume() {
         super.onResume();
+        System.err.print("OnResume");
 
         String bleMacAddress = getBluetoothDevice();
-        if (bleMacAddress != null && menu != null) {
+        if (bleMacAddress == null) { System.err.println("bleMacAddress is NULL"); }
+        if (menu == null) { System.err.println("menu is NULL"); }
+        if (bleMacAddress != null /*&& menu != null*/) {
             addBluetoothToMenuAndConnectionStatus(bleMacAddress);
         }
     }
@@ -329,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
-        ///< Get a reference to the MetaWear service from the binder
+        // Get a reference to the MetaWear service from the binder
         mwBinder = (MetaWearBleService.LocalBinder) service;
         String bleMacAddress = getBluetoothDevice();
         Log.i("Service Connected", "Stored mac address is " + bleMacAddress);
@@ -352,7 +354,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         }
     }
 
-    ///< Don't need this callback method but we must implement it
+    // Don't need this callback method but we must implement it
     @Override
     public void onServiceDisconnected(ComponentName name) {
     }
@@ -375,13 +377,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     @Override
     public UUID[] getFilterServiceUuids() {
-        ///< Only return MetaWear boards in the scan
+        // Only return MetaWear boards in the scan
         return new UUID[]{UUID.fromString("326a9000-85cb-9195-d9dd-464cfbbae75a")};
     }
 
     @Override
     public long getScanDuration() {
-        ///< Scan for 10000ms (10 seconds)
+        // Scan for 10 seconds
         return 10000;
     }
 
@@ -465,7 +467,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                           }
             );
             if (btDeviceSelected) {
+                System.err.println("btDeviceSelected");
                 if ((adapters == null) || !adapters.contains(mwBoard.getMacAddress())) {
+                    System.err.println("********btDeviceSelected but adapters null or adapters doesn't contain MacAdrr********");
                     MWDeviceConfirmFragment mwDeviceConfirmFragment = new MWDeviceConfirmFragment();
                     mwDeviceConfirmFragment.flashDeviceLight(mwBoard, getFragmentManager());
                     thermService.getCurrentTemp(mwBoard);
@@ -474,15 +478,18 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            System.err.println("********btDeviceSelected********");
                             addBluetoothToMenuAndConnectionStatus(mwBoard.getMacAddress());
 //                            mGraphFragment.updateGraph();
                         }
                     });
                 }
             } else if (refresh) {
+                System.err.println("REFRESH");
                 refresh = false;
                 thermService.getCurrentTemp(mwBoard);
             } else if (reset) {
+                System.err.println("RESTET");
                 try {
                     mwBoard.getModule(Debug.class).resetDevice();
                 } catch (Exception e) {
@@ -501,11 +508,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        System.err.println();
                         disconnectAdapter();
                         forgetDevice(bluetoothDevice.getAddress());
                     }
                 });
             } else if (reconnect) {
+                System.err.println("RECONNECT");
                 reconnect = false;
                 runOnUiThread(new Runnable() {
                     @Override
