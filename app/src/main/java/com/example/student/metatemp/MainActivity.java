@@ -38,7 +38,6 @@ import android.widget.Toast;
 import com.mbientlab.bletoolbox.scanner.BleScannerFragment;
 import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard;
-import com.mbientlab.metawear.MetaWearBleService;
 import com.mbientlab.metawear.MetaWearBoard.ConnectionStateHandler;
 import com.mbientlab.metawear.UnsupportedModuleException;
 import com.mbientlab.metawear.module.Debug;
@@ -230,7 +229,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             try {
                 Debug debug = mwBoard.getModule(Debug.class);
                 if (debug != null) {
-                    System.err.println("Resetting Device!");
                     debug.resetDevice();
                 }
             } catch (UnsupportedModuleException e){
@@ -276,12 +274,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     protected void onResume() {
         super.onResume();
-        System.err.print("OnResume");
 
         String bleMacAddress = getBluetoothDevice();
-        if (bleMacAddress == null) { System.err.println("bleMacAddress is NULL"); }
-        if (menu == null) { System.err.println("menu is NULL"); }
-        if (bleMacAddress != null /*&& menu != null*/) {
+        if (bleMacAddress != null) {
             addBluetoothToMenuAndConnectionStatus(bleMacAddress);
         }
     }
@@ -299,10 +294,10 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onStop() {
         super.onStop();
         // Unbind from the service
-        if (thermBound) {
-            unbindService(mConnection);
-            thermBound = false;
-        }
+//        if (thermBound) {
+//            unbindService(mConnection);
+//            thermBound = false;
+//        }
     }
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -326,6 +321,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     public void onDestroy() {
         super.onDestroy();
 
+        // Unbind from the service
+        if (thermBound) {
+            unbindService(mConnection);
+            thermBound = false;
+        }
         getApplicationContext().unbindService(this);
     }
 
@@ -345,7 +345,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     protected void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
         if (mwBoard != null) {
-            mwBoard.disconnect();
             editor.putString("ble_mac_address", mwBoard.getMacAddress());
             state.putByteArray(mwBoard.getMacAddress(), mwBoard.serializeState());
             editor.putString(mwBoard.getMacAddress(), new String(mwBoard.serializeState()));
@@ -403,6 +402,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         }
     }
 
+    // onClick function for the "confirm LED is flashing" confirmation dialog's "No" button
     public void dontPairDevice() {
         mwBoard.disconnect();
         bluetoothDevice = null;
@@ -467,9 +467,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                           }
             );
             if (btDeviceSelected) {
-                System.err.println("btDeviceSelected");
                 if ((adapters == null) || !adapters.contains(mwBoard.getMacAddress())) {
-                    System.err.println("********btDeviceSelected but adapters null or adapters doesn't contain MacAdrr********");
                     MWDeviceConfirmFragment mwDeviceConfirmFragment = new MWDeviceConfirmFragment();
                     mwDeviceConfirmFragment.flashDeviceLight(mwBoard, getFragmentManager());
                     thermService.getCurrentTemp(mwBoard);
@@ -478,18 +476,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            System.err.println("********btDeviceSelected********");
                             addBluetoothToMenuAndConnectionStatus(mwBoard.getMacAddress());
-//                            mGraphFragment.updateGraph();
                         }
                     });
                 }
             } else if (refresh) {
-                System.err.println("REFRESH");
                 refresh = false;
                 thermService.getCurrentTemp(mwBoard);
             } else if (reset) {
-                System.err.println("RESTET");
                 try {
                     mwBoard.getModule(Debug.class).resetDevice();
                 } catch (Exception e) {
@@ -508,13 +502,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        System.err.println();
                         disconnectAdapter();
                         forgetDevice(bluetoothDevice.getAddress());
                     }
                 });
             } else if (reconnect) {
-                System.err.println("RECONNECT");
                 reconnect = false;
                 runOnUiThread(new Runnable() {
                     @Override
